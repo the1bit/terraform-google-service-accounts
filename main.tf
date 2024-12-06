@@ -67,10 +67,10 @@ resource "google_project_iam_member" "project-roles" {
 
 # conditionally assign billing user role at the org level
 resource "google_organization_iam_member" "billing_user" {
-  for_each = local.org_billing ? local.names : toset([])
-  org_id   = var.org_id
-  role     = "roles/billing.user"
-  member   = "serviceAccount:${google_service_account.service_accounts[each.value].email}"
+  count  = local.org_billing ? length(local.names) : 0
+  org_id = var.org_id
+  role   = "roles/billing.user"
+  member = "serviceAccount:${google_service_account.service_accounts[count.index].email}"
 }
 
 # conditionally assign billing user role on a specific billing account
@@ -85,17 +85,18 @@ resource "google_billing_account_iam_member" "billing_user" {
 # ref: https://cloud.google.com/vpc/docs/shared-vpc
 
 resource "google_organization_iam_member" "xpn_admin" {
-  for_each = local.xpn ? local.names : toset([])
-  org_id   = var.org_id
-  role     = "roles/compute.xpnAdmin"
-  member   = "serviceAccount:${google_service_account.service_accounts[each.value].email}"
+  count  = local.xpn ? length(local.names) : 0
+  org_id = var.org_id
+  role   = "roles/compute.xpnAdmin"
+  member = "serviceAccount:${google_service_account.service_accounts[count.index].email}"
 }
 
+
 resource "google_organization_iam_member" "organization_viewer" {
-  for_each = local.xpn ? local.names : toset([])
+  count  = local.xpn ? length(local.names) : 0
   org_id   = var.org_id
   role     = "roles/resourcemanager.organizationViewer"
-  member   = "serviceAccount:${google_service_account.service_accounts[each.value].email}"
+  member   = "serviceAccount:${google_service_account.service_accounts[count.index].email}"
 }
 
 # keys
